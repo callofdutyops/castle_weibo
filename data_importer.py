@@ -91,6 +91,7 @@ def calc_deepth(repost_records):
 def save_plot_breadth(weibo_counter_dict):
     with open('weibo_counter_dict.pickle', 'wb') as handle:
         pickle.dump(weibo_counter_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    plt.clf()
     for i in range(1, 3001):
         weibo_id = 'testWeibo' + str(i)
         axis_x = []
@@ -105,6 +106,7 @@ def save_plot_breadth(weibo_counter_dict):
 def save_plot_deepth(weibo_repostdeepth_dict):
     with open('weibo_repostdeepth_dict.pickle', 'wb') as handle:
         pickle.dump(weibo_repostdeepth_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    plt.clf()
     for i in range(1, 3001):
         weibo_id = 'testWeibo' + str(i)
         axis_x = []

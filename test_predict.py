@@ -1,5 +1,6 @@
 import pickle
 import numpy as np
+from scipy.optimize import curve_fit
 import statsmodels.api as sm
 from collections import defaultdict
 import csv
@@ -17,6 +18,10 @@ def import_data():
     return weibo_counter_dict, weibo_repostdeepth_dict
 
 
+def func_fit(x, a, b):
+    return a + b * np.log(x)
+
+
 def predict_breadth(weibo_counter_dict):
     weibo_breadth_pre = defaultdict(list)
     for i in range(1, 3001):
@@ -26,15 +31,12 @@ def predict_breadth(weibo_counter_dict):
         weibo_nums = []
         for time_point, weibo_num in data:
             time_points.append(time_point)
-            weibo_nums.append(weibo_num)
-        if weibo_nums[-1] > 100:
-            olsmod = sm.OLS(weibo_nums, time_points)
-            olsres = olsmod.fit()
-            time_pre = np.linspace(4500, 262800, 288)
-            weibo_num_pre = olsres.predict(time_pre)
-            weibo_num_pre = weibo_num_pre.tolist()
-        else:
-            weibo_num_pre = [weibo_nums[-1]] * 288
+            weibo_nums.append(weibo_num + 2)  # Plus two to avoid logx=0 when x=1 or 0
+        fitting_parameters, covariance = curve_fit(func_fit, time_points, weibo_nums)
+        a, b = fitting_parameters
+        time_pre = np.linspace(4500, 262800, 288)
+        weibo_num_pre = func_fit(time_pre, a, b)
+        weibo_num_pre = weibo_num_pre.tolist()
         for j in range(len(weibo_num_pre)):
             weibo_num_pre[j] = int(weibo_num_pre[j])
         weibo_breadth_pre[weibo_id] = weibo_num_pre
@@ -50,15 +52,12 @@ def predict_deepth(weibo_repostdeepth_dict):
         weibo_deepths = []
         for time_point, weibo_deepth in data:
             time_points.append(time_point)
-            weibo_deepths.append(weibo_deepth)
-        if weibo_deepths[-1] > 15:
-            olsmod = sm.OLS(weibo_deepths, time_points)
-            olsres = olsmod.fit()
-            time_pre = np.linspace(4500, 262800, 288)
-            weibo_deepth_pre = olsres.predict(time_pre)
-            weibo_deepth_pre = weibo_deepth_pre.tolist()
-        else:
-            weibo_deepth_pre = [weibo_deepths[-1]] * 288
+            weibo_deepths.append(weibo_deepth + 2)  # Plus two to avoid logx=0 when x=1 or 0
+        fitting_parameters, covariance = curve_fit(func_fit, time_points, weibo_deepths)
+        a, b = fitting_parameters
+        time_pre = np.linspace(4500, 262800, 288)
+        weibo_deepth_pre = func_fit(time_pre, a, b)
+        weibo_deepth_pre = weibo_deepth_pre.tolist()
         for j in range(len(weibo_deepth_pre)):
             weibo_deepth_pre[j] = int(weibo_deepth_pre[j])
         weibo_deepth_pre_dict[weibo_id] = weibo_deepth_pre
