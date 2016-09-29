@@ -27,20 +27,17 @@ def predict_breadth(weibo_counter_dict):
         for time_point, weibo_num in data:
             time_points.append(time_point)
             weibo_nums.append(weibo_num)
-        if (len(time_points) > 0 and len(weibo_nums)) > 0:
-            if weibo_nums[-1] > 100:
-                olsmod = sm.OLS(weibo_nums, time_points)
-                olsres = olsmod.fit()
-                time_pre = np.linspace(4500, 262800, 288)
-                weibo_num_pre = olsres.predict(time_pre)
-                weibo_num_pre = weibo_num_pre.tolist()
-            else:
-                weibo_num_pre = [weibo_nums[-1]] * 288
-            for j in range(len(weibo_num_pre)):
-                weibo_num_pre[j] = int(weibo_num_pre[j])
-            weibo_breadth_pre[weibo_id] = weibo_num_pre
+        if weibo_nums[-1] > 100:
+            olsmod = sm.OLS(weibo_nums, time_points)
+            olsres = olsmod.fit()
+            time_pre = np.linspace(4500, 262800, 288)
+            weibo_num_pre = olsres.predict(time_pre)
+            weibo_num_pre = weibo_num_pre.tolist()
         else:
-            weibo_breadth_pre[weibo_id] = [200] * 288
+            weibo_num_pre = [weibo_nums[-1]] * 288
+        for j in range(len(weibo_num_pre)):
+            weibo_num_pre[j] = int(weibo_num_pre[j])
+        weibo_breadth_pre[weibo_id] = weibo_num_pre
     return weibo_breadth_pre
 
 
@@ -54,20 +51,17 @@ def predict_deepth(weibo_repostdeepth_dict):
         for time_point, weibo_deepth in data:
             time_points.append(time_point)
             weibo_deepths.append(weibo_deepth)
-        if (len(time_points) > 0 and len(weibo_deepths)) > 0:
-            if weibo_deepths[-1] > 15:
-                olsmod = sm.OLS(weibo_deepths, time_points)
-                olsres = olsmod.fit()
-                time_pre = np.linspace(4500, 262800, 288)
-                weibo_deepth_pre = olsres.predict(time_pre)
-                weibo_deepth_pre = weibo_deepth_pre.tolist()
-            else:
-                weibo_deepth_pre = [weibo_deepths[-1]] * 288
-            for j in range(len(weibo_deepth_pre)):
-                weibo_deepth_pre[j] = int(weibo_deepth_pre[j])
-            weibo_deepth_pre_dict[weibo_id] = weibo_deepth_pre
+        if weibo_deepths[-1] > 15:
+            olsmod = sm.OLS(weibo_deepths, time_points)
+            olsres = olsmod.fit()
+            time_pre = np.linspace(4500, 262800, 288)
+            weibo_deepth_pre = olsres.predict(time_pre)
+            weibo_deepth_pre = weibo_deepth_pre.tolist()
         else:
-            weibo_deepth_pre_dict[weibo_id] = [5] * 288
+            weibo_deepth_pre = [weibo_deepths[-1]] * 288
+        for j in range(len(weibo_deepth_pre)):
+            weibo_deepth_pre[j] = int(weibo_deepth_pre[j])
+        weibo_deepth_pre_dict[weibo_id] = weibo_deepth_pre
     return weibo_deepth_pre_dict
 
 

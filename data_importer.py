@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Simple test uses just the timepoing of weibo
+# Simple test uses just the timepoint of weibo
 from collections import defaultdict
 
 import matplotlib.pyplot as plt
@@ -17,7 +17,6 @@ FILE_PATH2 = '/home/hp/Documents/DeepLearning/DataCastle/Weibo/Data/testRepostBe
 # Data importer
 def data_import():
     origin = pd.read_table(FILE_PATH, sep='\001', header=None, usecols=[0, 1, 2, 3])
-    print(origin.shape)
     repost_records = []
     weibo_ids = origin.iloc[:, 0].values
     weibo_author_ids = origin.iloc[:, 1].values
@@ -27,7 +26,6 @@ def data_import():
         repost_record = RepostRecord(weibo_ids[i], weibo_author_ids[i], weibo_reauthor_ids[i], weibo_timepoints[i])
         repost_records.append(repost_record)
     origin2 = pd.read_table(FILE_PATH2, sep='\001', header=None, usecols=[0, 1, 2, 3])
-    print(origin2.shape)
     weibo_ids = origin2.iloc[:, 0].values
     weibo_author_ids = origin2.iloc[:, 1].values
     weibo_reauthor_ids = origin2.iloc[:, 2].values
@@ -35,7 +33,6 @@ def data_import():
     for i in range(origin2.shape[0]):
         repost_record = RepostRecord(weibo_ids[i], weibo_author_ids[i], weibo_reauthor_ids[i], weibo_timepoints[i])
         repost_records.append(repost_record)
-    print(len(repost_records))
     return repost_records
 
 
