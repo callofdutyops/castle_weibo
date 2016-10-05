@@ -1,98 +1,94 @@
 #!/usr/bin/python
 
 # Import relation data into Neo4j Graph database
-import csv
+import pickle
 import re
+from collections import defaultdict
 
+# Real data
 FILE_PATH = '/home/hp/Documents/DeepLearning/DataCastle/Weibo/Data/weibo_dc_parse2015_link_filter'
+# Sampled file from real data for test purpose
 TEST_FILE_PATH = '/home/hp/Documents/DeepLearning/DataCastle/Weibo/Data/relationshiptest.txt'
+# Just using bloggers' id in this file
+BLOGGERS_FILE_PATH = '/home/hp/Documents/DeepLearning/DataCastle/Weibo/castle_weibo/TRweibo_feature.pickle'
 
 
-# Data importer
-# def out_degree_calc():
-#     weibo_relation_out_degree_dict = defaultdict(int)
-#     # progress indicator
-#     index = 0
-#     sep = re.compile('\001|\t')
-#     with open(FILE_PATH, 'r') as myfile:
-#         for l in myfile.readlines():
-#             arr = sep.split(l.strip())
-#             blogger = int(arr[0])
-#             index += 1
-#             # print per 100000 steps
-#             if index % 100000 == 0:
-#                 print(index)
-#             weibo_relation_out_degree_dict[blogger] = len(arr) - 1
-#     with open('weibo_relation_out_degree_dict.pickle', 'wb') as handle:
-#         pickle.dump(weibo_relation_out_degree_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-#
-#
-# def in_degree_calc():
-#     weibo_relation_in_degree_dict = defaultdict(int)
-#     index = 0
-#     sep = re.compile('\001|\t')
-#     blogger = []
-#     c = Counter([])
-#     with open(FILE_PATH, 'r') as myfile:
-#         for l in myfile.readlines():
-#             arr = sep.split(l.strip())
-#             blogger.append(arr[0])
-#         blogger = list(map(int, blogger))
-#         print('Bloggers have been imported, the length is %d' % len(blogger))
-#         print('Now importe in_degreee...')
-#     with open(FILE_PATH, 'r') as myfile:
-#         for l in myfile.readlines():
-#             arr = sep.split(l.strip())
-#             arr = list(map(int, arr[1:]))
-#             c += Counter(arr)
-#             index += 1
-#             if index % 10000 == 0:
-#                 print(index)
-#                 with open('counter.pickle', 'wb') as handle:
-#                     pickle.dump(c, handle, protocol=pickle.HIGHEST_PROTOCOL)
-#     for i in range(len(blogger)):
-#         weibo_relation_in_degree_dict[blogger[i]] = c[blogger[i]]
-#     print(weibo_relation_in_degree_dict[4534517])
-#     with open('weibo_relation_in_degree_dict.pickle', 'wb') as handle:
-#         pickle.dump(weibo_relation_in_degree_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-
-# def import_relation_into_neo4j():
-#     driver = GraphDatabase.driver("bolt://localhost", auth=basic_auth("neo4j", "huangpu"))
-#     session = driver.session()
-#     # progress indicator
-#     index = 0
-#     sep = re.compile('\001|\t')
-#     with open(FILE_PATH, 'r') as myfile:
-#         for l in myfile.readlines():
-#             arr = sep.split(l.strip())
-#             follower = arr[0]
-#             session.run("MERGE (follower:Person {name:{follower}})", {"follower": follower})
-#             for followed in arr[1:]:
-#                 session.run("MATCH (a:Person {name:{name}}) MERGE (a)-[:FOLLOWS]->(x:Person {name:{n}})",
-#                             {"name": follower, "n": followed})
-#             index += 1
-#             # print per 100000 steps
-#             print(index)
-
-def convert_to_csv():
-    # progress indicator
+def out_degree_calc():
+    weibo_relation_out_degree_dict = defaultdict(int)
+    # Progress indicator
     index = 0
     sep = re.compile('\001|\t')
-    with open('relationshiptest.csv', 'w') as outfile:
-        writer = csv.writer(outfile, delimiter=',')
-        with open(FILE_PATH, 'r') as myfile:
-            for l in myfile.readlines():
-                arr = sep.split(l.strip())
-                writer.writerow(arr)
-                index += 1
-                # print per 100000 steps
-                if index % 100000 == 0:
-                    print(index)
+    blogger_ids = set()
+    with open(BLOGGERS_FILE_PATH, 'rb') as handle:
+        tr_weibo_features = pickle.load(handle)
+    for feature in tr_weibo_features:
+        # Blogger id is in the second col
+        blogger_ids.add(feature[1])
+    print('Bloggers have been imported, the length is %d' % len(blogger_ids))
+    print('Now importe in_degreee...')
+    with open(FILE_PATH, 'r') as myfile:
+        for l in myfile.readlines():
+            arr = sep.split(l.strip())
+            if int(arr[0]) in blogger_ids:
+                weibo_relation_out_degree_dict[int(arr[0])] = len(arr) - 1
+            index += 1
+            # Indicator per 100000 steps
+            if index % 100000 == 0:
+                print(index)
+    print(len(weibo_relation_out_degree_dict))
+    with open('weibo_relation_out_degree_dict.pickle', 'wb') as handle:
+        pickle.dump(weibo_relation_out_degree_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def in_degree_calc():
+    weibo_relation_in_degree_dict = defaultdict(int)
+    # Progress indicator
+    index = 0
+    sep = re.compile('\001|\t')
+    blogger_ids = set()
+    with open(BLOGGERS_FILE_PATH, 'rb') as handle:
+        tr_weibo_features = pickle.load(handle)
+    for feature in tr_weibo_features:
+        # Blogger id is in the second col
+        blogger_ids.add(feature[1])
+    print('Bloggers have been imported, the length is %d' % len(blogger_ids))
+    print('Now importe in_degreee...')
+    with open(FILE_PATH, 'r') as myfile:
+        for l in myfile.readlines():
+            arr = sep.split(l.strip())
+            arr = list(map(int, arr[1:]))
+            for a in arr:
+                if a in blogger_ids:
+                    weibo_relation_in_degree_dict[a] += 1
+            index += 1
+            # Indicator per 100000 steps
+            if index % 100000 == 0:
+                print(index)
+    print(weibo_relation_in_degree_dict[2724513])
+    print(len(weibo_relation_in_degree_dict))
+    with open('weibo_relation_in_degree_dict.pickle', 'wb') as handle:
+        pickle.dump(weibo_relation_in_degree_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+# def convert_to_csv():
+#     # progress indicator
+#     index = 0
+#     sep = re.compile('\001|\t')
+#     with open('relationshiptest.csv', 'w') as outfile:
+#         writer = csv.writer(outfile, delimiter=',')
+#         with open(FILE_PATH, 'r') as myfile:
+#             for l in myfile.readlines():
+#                 arr = sep.split(l.strip())
+#                 writer.writerow(arr)
+#                 index += 1
+#                 # print per 100000 steps
+#                 if index % 100000 == 0:
+#                     print(index)
 
 
 def main():
-    convert_to_csv()
+    out_degree_calc()
+    in_degree_calc()
 
 
 if __name__ == '__main__':
