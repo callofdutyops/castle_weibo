@@ -38,11 +38,11 @@ for i in range(origin.shape[0]):
     time = post_time[i]
     time = datetime.datetime.strptime(time, '%H:%M:%S')
     t = time.hour
-    if t <= 6:
+    if t < 6:
        time_period = 0
-    elif t <= 12:
+    elif t < 12:
         time_period = 1
-    elif t <= 18:
+    elif t < 18:
         time_period =2
     else:
         time_period = 3
