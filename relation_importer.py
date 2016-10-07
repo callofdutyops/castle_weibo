@@ -9,8 +9,9 @@ from collections import defaultdict
 FILE_PATH = '/home/hp/Documents/DeepLearning/DataCastle/Weibo/Data/weibo_dc_parse2015_link_filter'
 # Sampled file from real data for test purpose
 TEST_FILE_PATH = '/home/hp/Documents/DeepLearning/DataCastle/Weibo/Data/relationshiptest.txt'
-# Just using bloggers' id in this file
-BLOGGERS_FILE_PATH = '/home/hp/Documents/DeepLearning/DataCastle/Weibo/castle_weibo/TRweibo_feature.pickle'
+# Just using bloggers' id in those files
+TR_BLOGGERS_FILE_PATH = '/home/hp/Documents/DeepLearning/DataCastle/Weibo/castle_weibo/TRweibo_feature.pickle'
+TE_BLOGGERS_FILE_PATH = '/home/hp/Documents/DeepLearning/DataCastle/Weibo/castle_weibo/TEweibo_feature.pickle'
 
 
 def out_degree_calc():
@@ -19,9 +20,14 @@ def out_degree_calc():
     index = 0
     sep = re.compile('\001|\t')
     blogger_ids = set()
-    with open(BLOGGERS_FILE_PATH, 'rb') as handle:
+    with open(TR_BLOGGERS_FILE_PATH, 'rb') as handle:
         tr_weibo_features = pickle.load(handle)
+    with open(TE_BLOGGERS_FILE_PATH, 'rb') as handle:
+        te_weibo_features = pickle.load(handle)
     for feature in tr_weibo_features:
+        # Blogger id is in the second col
+        blogger_ids.add(feature[1])
+    for feature in te_weibo_features:
         # Blogger id is in the second col
         blogger_ids.add(feature[1])
     print('Bloggers have been imported, the length is %d' % len(blogger_ids))
@@ -46,11 +52,17 @@ def in_degree_calc():
     index = 0
     sep = re.compile('\001|\t')
     blogger_ids = set()
-    with open(BLOGGERS_FILE_PATH, 'rb') as handle:
+    with open(TR_BLOGGERS_FILE_PATH, 'rb') as handle:
         tr_weibo_features = pickle.load(handle)
+    with open(TE_BLOGGERS_FILE_PATH, 'rb') as handle:
+        te_weibo_features = pickle.load(handle)
     for feature in tr_weibo_features:
         # Blogger id is in the second col
         blogger_ids.add(feature[1])
+    for feature in te_weibo_features:
+        # Blogger id is in the second col
+        blogger_ids.add(feature[1])
+    print(len(weibo_relation_in_degree_dict))
     print('Bloggers have been imported, the length is %d' % len(blogger_ids))
     print('Now importe in_degreee...')
     with open(FILE_PATH, 'r') as myfile:
